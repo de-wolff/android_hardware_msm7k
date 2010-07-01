@@ -42,6 +42,8 @@ ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libdl
 endif
 
+LOCAL_PRELINK_MODULE := false
+
 LOCAL_SRC_FILES += AudioHardware.cpp
 
 LOCAL_CFLAGS += -fno-short-enums
