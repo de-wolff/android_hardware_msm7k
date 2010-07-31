@@ -22,6 +22,7 @@
 
 #include <utils/threads.h>
 #include <binder/MemoryHeapPmem.h>
+#include <camera/CameraParameters.h>
 #include <utils/String16.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -63,8 +64,9 @@ extern "C" {
 #define THUMBNAIL_BUFFER_SIZE (THUMBNAIL_WIDTH * THUMBNAIL_HEIGHT * 3/2)
 
 #define DEFAULT_PREVIEW_SETTING 2 // HVGA
+#define PREVIEW_FRAME_RATE 20
 #define PREVIEW_SIZE_COUNT (sizeof(preview_sizes)/sizeof(preview_size_type))
-
+	
 #define NOT_FOUND -1
 
 #if DLOPEN_LIBMMCAMERA
@@ -249,25 +251,25 @@ void QualcommCameraHardware::initDefaultParameters()
 
     preview_size_type *ps = &preview_sizes[DEFAULT_PREVIEW_SETTING];
     p.setPreviewSize(ps->width, ps->height);
-    p.setPreviewFrameRate(15);
-    p.setPreviewFormat("yuv420sp"); // informative
-    p.setPictureFormat("jpeg"); // informative
+    p.setPreviewFrameRate(PREVIEW_FRAME_RATE);
+    p.setPreviewFormat(CameraParameters::PIXEL_FORMAT_YUV420SP); // informative
+    p.setPictureFormat(CameraParameters::PIXEL_FORMAT_JPEG); // informative
 
-    p.set("jpeg-quality", "100"); // maximum quality
-    p.set("jpeg-thumbnail-width", THUMBNAIL_WIDTH_STR); // informative
-    p.set("jpeg-thumbnail-height", THUMBNAIL_HEIGHT_STR); // informative
-    p.set("jpeg-thumbnail-quality", "90");
+    p.set(CameraParameters::KEY_JPEG_QUALITY, "100"); // maximum quality
+    p.set(CameraParameters::KEY_JPEG_THUMBNAIL_WIDTH, THUMBNAIL_WIDTH_STR); // informative
+    p.set(CameraParameters::KEY_JPEG_THUMBNAIL_HEIGHT, THUMBNAIL_HEIGHT_STR); // informative
+    p.set(CameraParameters::KEY_JPEG_THUMBNAIL_QUALITY, "90");
 
     p.setPictureSize(DEFAULT_PICTURE_WIDTH, DEFAULT_PICTURE_HEIGHT);
-    p.set("antibanding", "off");
-    p.set("effect", "none");
-    p.set("whitebalance", "auto");
+    p.set(CameraParameters::KEY_ANTIBANDING, CameraParameters::ANTIBANDING_OFF);
+    p.set(CameraParameters::KEY_EFFECT, CameraParameters::EFFECT_NONE);
+    p.set(CameraParameters::KEY_WHITE_BALANCE, CameraParameters::WHITE_BALANCE_AUTO);
 
 #if 0
-    p.set("gps-timestamp", "1199145600"); // Jan 1, 2008, 00:00:00
-    p.set("gps-latitude", "37.736071"); // A little house in San Francisco
-    p.set("gps-longitude", "-122.441983");
-    p.set("gps-altitude", "21"); // meters
+    p.set(CameraParameters::KEY_GPS_TIMESTAMP, "1199145600"); // Jan 1, 2008, 00:00:00
+    p.set(CameraParameters::KEY_GPS_LATITUDE, "37.736071"); // A little house in San Francisco
+    p.set(CameraParameters::KEY_GPS_LONGITUDE, "-122.441983");
+    p.set(CameraParameters::KEY_GPS_ALTITUDE, "21"); // meters
 #endif
 
     // This will happen only one in the lifetime of the mediaserver process.
@@ -276,11 +278,11 @@ void QualcommCameraHardware::initDefaultParameters()
     INIT_VALUES_FOR(effect);
     INIT_VALUES_FOR(whitebalance);
 
-    p.set("antibanding-values", antibanding_values);
-    p.set("effect-values", effect_values);
-    p.set("whitebalance-values", whitebalance_values);
-    p.set("picture-size-values", "2048x1536,1600x1200,1024x768");
-	p.set("preview-size-values", "480x320,352x288,320x240,176x144");
+    p.set(CameraParameters::KEY_SUPPORTED_ANTIBANDING, antibanding_values);
+    p.set(CameraParameters::KEY_SUPPORTED_EFFECTS, effect_values);
+    p.set(CameraParameters::KEY_SUPPORTED_WHITE_BALANCE, whitebalance_values);
+    p.set(CameraParameters::KEY_SUPPORTED_PICTURE_SIZES, "2048x1536,1600x1200,1024x768");
+	p.set(CameraParameters::KEY_SUPPORTED_PREVIEW_SIZES, "480x320,352x288,320x240,176x144");
 
     if (setParameters(p) != NO_ERROR) {
         LOGE("Failed to set default parameters?!");
